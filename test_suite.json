@@ -1,0 +1,22 @@
+[
+  {"id": 1,  "prompt": "What is the capital of France?",                                                                                                          "label": "simple"},
+  {"id": 2,  "prompt": "What does HTTP stand for?",                                                                                                               "label": "simple"},
+  {"id": 3,  "prompt": "Who wrote Romeo and Juliet?",                                                                                                             "label": "simple"},
+  {"id": 4,  "prompt": "What is 144 divided by 12?",                                                                                                              "label": "simple"},
+  {"id": 5,  "prompt": "Translate 'hello' to Spanish.",                                                                                                           "label": "simple"},
+  {"id": 6,  "prompt": "What year did World War II end?",                                                                                                          "label": "simple"},
+  {"id": 7,  "prompt": "Give me a one-sentence definition of machine learning.",                                                                                   "label": "simple"},
+  {"id": 8,  "prompt": "What is the boiling point of water in Celsius?",                                                                                          "label": "simple"},
+  {"id": 9,  "prompt": "List the planets in the solar system.",                                                                                                    "label": "simple"},
+  {"id": 10, "prompt": "What is the syntax to declare a variable in Python?",                                                                                     "label": "simple"},
+  {"id": 11, "prompt": "Explain the difference between supervised and unsupervised learning, and give a real-world example of each.",                             "label": "complex"},
+  {"id": 12, "prompt": "Write a Python function that implements binary search on a sorted list and explain its time complexity.",                                  "label": "complex"},
+  {"id": 13, "prompt": "Compare REST and GraphQL APIs. When would you choose one over the other in a production microservices architecture?",                     "label": "complex"},
+  {"id": 14, "prompt": "Analyze the trade-offs between using a relational database vs a document store for a high-traffic e-commerce platform.",                  "label": "complex"},
+  {"id": 15, "prompt": "Design a rate-limiting algorithm for an API gateway that handles 10,000 requests per second. Describe the data structures you would use.", "label": "complex"},
+  {"id": 16, "prompt": "Debug the following Python code that is supposed to merge two sorted arrays but produces incorrect output: def merge(a,b): return sorted(a+b)", "label": "complex"},
+  {"id": 17, "prompt": "Explain how transformer attention mechanisms work step by step, and why they outperform RNNs for long sequences.",                         "label": "complex"},
+  {"id": 18, "prompt": "Write and explain a SQL query that finds the top 3 customers by revenue for each region using window functions.",                         "label": "complex"},
+  {"id": 19, "prompt": "Evaluate the ethical implications of using facial recognition in public surveillance. Consider privacy, bias, and regulatory perspectives.", "label": "complex"},
+  {"id": 20, "prompt": "Refactor this code to use async/await and explain each change: import requests\ndef get_data(url):\n    r = requests.get(url)\n    return r.json()", "label": "complex"}
+]
