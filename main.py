@@ -118,8 +118,10 @@ async def chat(req: ChatRequest):
         }
 
     # 2. Route
+    t_route = time.perf_counter()
     routing = route(prompt)
-    model_label = routing["model"]  # "fast" | "capable"
+    routing_latency_ms = round((time.perf_counter() - t_route) * 1000, 3)
+    model_label = routing["model"]
 
     # 3. Call LLM
     try:
@@ -148,6 +150,7 @@ async def chat(req: ChatRequest):
         "routing_reason": routing["reason"],
         "routing_score": routing["score"],
         "routing_confidence": routing["confidence"],
+        "routing_latency_ms": routing_latency_ms,
         "latency_ms": latency_ms,
         "cache_hit": False,
         "tokens": tokens,
@@ -160,6 +163,7 @@ async def chat(req: ChatRequest):
         "routing_reason": routing["reason"],
         "routing_score": routing["score"],
         "routing_confidence": routing["confidence"],
+        "routing_latency_ms": routing_latency_ms,
         "latency_ms": latency_ms,
         "cache_hit": False,
         "tokens": tokens,

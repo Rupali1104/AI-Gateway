@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>AI Gateway</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Segoe UI', sans-serif; background: #f0f2f5; min-height: 100vh; display: flex; flex-direction: column; align-items: center; padding: 40px 16px; }
+    h1 { font-size: 1.8rem; color: #1a1a2e; margin-bottom: 4px; }
+    .subtitle { color: #666; font-size: 0.9rem; margin-bottom: 32px; }
+    .card { background: white; border-radius: 12px; box-shadow: 0 2px 12px rgba(0,0,0,0.08); padding: 28px; width: 100%; max-width: 720px; }
+    textarea { width: 100%; border: 1px solid #ddd; border-radius: 8px; padding: 12px; font-size: 0.95rem; resize: vertical; min-height: 100px; outline: none; transition: border 0.2s; }
+    textarea:focus { border-color: #4f46e5; }
+    button { margin-top: 12px; width: 100%; padding: 12px; background: #4f46e5; color: white; border: none; border-radius: 8px; font-size: 1rem; cursor: pointer; transition: background 0.2s; }
+    button:hover { background: #4338ca; }
+    button:disabled { background: #a5b4fc; cursor: not-allowed; }
+    .meta { margin-top: 20px; display: none; }
+    .badges { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 14px; }
+    .badge { padding: 4px 12px; border-radius: 20px; font-size: 0.78rem; font-weight: 600; }
+    .badge-fast     { background: #d1fae5; color: #065f46; }
+    .badge-capable  { background: #ede9fe; color: #4c1d95; }
+    .badge-cache    { background: #fef3c7; color: #92400e; }
+    .badge-score    { background: #e0f2fe; color: #0c4a6e; }
+    .badge-latency  { background: #fce7f3; color: #831843; }
+    .response-box { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 16px; font-size: 0.9rem; line-height: 1.6; color: #1e293b; white-space: pre-wrap; max-height: 400px; overflow-y: auto; }
+    .error-box { background: #fef2f2; border: 1px solid #fca5a5; border-radius: 8px; padding: 14px; color: #991b1b; font-size: 0.9rem; margin-top: 16px; display: none; }
+    .spinner { display: inline-block; width: 16px; height: 16px; border: 2px solid #fff; border-top-color: transparent; border-radius: 50%; animation: spin 0.7s linear infinite; vertical-align: middle; margin-right: 8px; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .history { width: 100%; max-width: 720px; margin-top: 24px; }
+    .history h2 { font-size: 1rem; color: #444; margin-bottom: 10px; }
+    .hist-item { background: white; border-radius: 8px; padding: 12px 16px; margin-bottom: 8px; box-shadow: 0 1px 4px rgba(0,0,0,0.06); font-size: 0.85rem; color: #333; display: flex; justify-content: space-between; align-items: center; gap: 12px; }
+    .hist-prompt { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .hist-badges { display: flex; gap: 6px; flex-shrink: 0; }
+  </style>
+</head>
+<body>
+
+<h1>AI Gateway</h1>
+<p class="subtitle">Smart routing — Fast model for simple tasks, Capable model for complex ones</p>
+
+<div class="card">
+  <textarea id="prompt" placeholder="Type your prompt here...&#10;&#10;Simple: 'What is the capital of France?'&#10;Complex: 'Write a Python binary search function and explain its time complexity.'"></textarea>
+  <button id="sendBtn" onclick="sendPrompt()">Send</button>
+
+  <div class="meta" id="meta">
+    <div class="badges" id="badges"></div>
+    <div class="response-box" id="responseBox"></div>
+  </div>
+  <div class="error-box" id="errorBox"></div>
+</div>
+
+<div class="history" id="historySection" style="display:none">
+  <h2>Request History</h2>
+  <div id="historyList"></div>
+</div>
+
+<script>
+  const API = "http://localhost:8000/chat";
+
+  async function sendPrompt() {
+    const prompt = document.getElementById("prompt").value.trim();
+    if (!prompt) return;
+
+    const btn = document.getElementById("sendBtn");
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spinner"></span>Thinking...';
+    document.getElementById("meta").style.display = "none";
+    document.getElementById("errorBox").style.display = "none";
+
+    try {
+      const res = await fetch(API, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ prompt })
+      });
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data.detail || "Request failed");
+      }
+
+      // Badges
+      const isCapable = data.model.includes("Capable");
+      const isCacheHit = data.cache_hit;
+      const badgesEl = document.getElementById("badges");
+      badgesEl.innerHTML = `
+        <span class="badge ${isCapable ? 'badge-capable' : 'badge-fast'}">${data.model}</span>
+        ${isCacheHit ? '<span class="badge badge-cache">Cache Hit</span>' : ''}
+        <span class="badge badge-score">Score: ${data.routing_score ?? 'N/A'}</span>
+        <span class="badge badge-latency">${data.latency_ms} ms</span>
+        ${data.routing_latency_ms !== undefined ? `<span class="badge badge-score">Route: ${data.routing_latency_ms}ms</span>` : ''}
+      `;
+
+      document.getElementById("responseBox").textContent = data.response;
+      document.getElementById("meta").style.display = "block";
+
+      // History
+      addHistory(prompt, data);
+
+    } catch (err) {
+      const eb = document.getElementById("errorBox");
+      eb.textContent = "Error: " + err.message;
+      eb.style.display = "block";
+    } finally {
+      btn.disabled = false;
+      btn.textContent = "Send";
+    }
+  }
+
+  function addHistory(prompt, data) {
+    document.getElementById("historySection").style.display = "block";
+    const list = document.getElementById("historyList");
+    const isCapable = data.model.includes("Capable");
+    const div = document.createElement("div");
+    div.className = "hist-item";
+    div.innerHTML = `
+      <span class="hist-prompt" title="${prompt}">${prompt}</span>
+      <div class="hist-badges">
+        <span class="badge ${isCapable ? 'badge-capable' : 'badge-fast'}">${isCapable ? 'Capable' : 'Fast'}</span>
+        ${data.cache_hit ? '<span class="badge badge-cache">Cache</span>' : ''}
+        <span class="badge badge-latency">${data.latency_ms}ms</span>
+      </div>
+    `;
+    list.prepend(div);
+  }
+
+  // Allow Ctrl+Enter to submit
+  document.getElementById("prompt").addEventListener("keydown", e => {
+    if (e.key === "Enter" && e.ctrlKey) sendPrompt();
+  });
+</script>
+</body>
+</html>
