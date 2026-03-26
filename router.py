@@ -36,6 +36,10 @@ COMPLEX_KEYWORDS = {
     "microservices", "production", "rate-limit", "rate limit", "data structure",
     "time complexity", "space complexity", "trade off", "outperform",
     "attention mechanism", "transformer", "supervised", "unsupervised",
+    "rest api", "endpoints", "request/response", "http methods", "system design",
+    "scalab", "distributed", "concurren", "fault toleran",
+    "linked list", "write a class", "data structure", "implement a",
+    "insert", "delete", "search method", "sorting", "recursion",
 }
 
 CODE_TOKENS = {"def ", "class ", "import ", "return ", "for ", "while ", "if __name__",
